@@ -8,28 +8,32 @@ Created on Thu Apr 23 20:00:28 2020
 
 import numpy as np
 import matplotlib.pyplot as plt  
-from liboptics import gaussPulse, squarePulse, spec, squarePulseSpec, width
-
-T = 2.0e-9
+from liboptics import gaussPulse, width, propDispersion
+    
+T = 2.0e-10
 Tmin = -T/2.0
 Tmax = T/2.0
 Nt = 1024
 Dt = T / Nt
-tau = 100e-12
+tau = 20e-12
 Pmax = 1
+b2 = 20 * 1e-27
+L = 100 * 1e3
 
 t = np.arange(Tmin, Tmax, Dt)
 y = gaussPulse(t, Pmax, tau)
 
+b = width(t, y, useInterp=True)
+z = propDispersion(t, y, b2, L)
+
 plt.close('all')
 plt.figure(1)
-plt.plot(t/tau, np.abs(y) ** 2.0, 's', label = 'Gauss' )
+plt.plot(t/1e-12,np.abs(y) ** 2.0, label ='Input')
+plt.plot(t/1e-12,np.abs(z) ** 2.0, label ='Output')
 plt.xlabel('t / tau')
 plt.ylabel('Pulse Power [Watt]')
-plt.title('Initial Pulses')
 plt.legend()
 
-b = width(t, y, useInterp=True)
-
-print(b/tau)
+bout = width(t, z, useInterp=True)
+print(bout/b)
 
