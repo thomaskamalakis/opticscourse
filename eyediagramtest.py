@@ -54,15 +54,39 @@ def addNoise(x, s2):
     
     x = x + np.sqrt(s2) * np.random.randn(x.size)
     return x
+
+def eyeOpening(p, highThreshold = 0.5, lowThreshold = 0.5):
+
+    Nw, points = p.shape
     
-bits = [1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1]
+    p = np.abs(p)
+    highThreshold = highThreshold * np.max(p)
+    lowThreshold = lowThreshold * np.max(p)
+    im = np.floor(points / 2.0)
+    im = int(im)
+    
+    highLevel = np.max(p)
+    lowLevel = np.min(p)
+    
+    for i in range(0, Nw):
+        
+        level = p[i,im]
+        
+        if level > highThreshold and level < highLevel:
+            highLevel = level
+        elif level < lowThreshold and level > lowLevel:
+            lowLevel = level
+        
+    return highLevel - lowLevel, highLevel, lowLevel, im
+
+bits = np.random.randint(0, 2, 100)
 Nb = len(bits)
 Rb = 10e9
 Tb = 1.0 / Rb
 Tg = 10.0 * Tb
 Pmax = 0.01
 B = 2.0 * Rb
-s2 = 5.0e-4
+s2 = 1.0e-5
 
 T = Nb * Tb + 2.0 * Tg
 Nt = 16384  
@@ -74,16 +98,22 @@ t = np.arange(Tmin, Tmax, Dt)
 x = bitPulsesGaussian(t, bits, Tb, Nb, Pmax, B)
 
 plt.close('all')   
-plt.figure(1)
-plt.plot(t, np.abs(x) )
 
 tpx, px = eyeDiagram(t, x, Tb/2.0, Nb*Tb + Tb/2.0, 2.0*Tb )
-plotEyeDiagram(tpx,px)
 
 y = addNoise(x, s2)
+tpy, py = eyeDiagram(t, y, Tb/2.0, Nb*Tb + Tb/2.0, 2.0*Tb )
 
-plt.figure()
-plt.plot(t, np.abs(y) )
+eyeX, hX, lX, imX = eyeOpening(px)
+eyeY, hY, lY, imY = eyeOpening(py)
+tmY = tpy[imY]
 
-tpy, py= eyeDiagram(t, y, Tb/2.0, Nb*Tb + Tb/2.0, 2.0*Tb )
+plotEyeDiagram(tpx,px)
 plotEyeDiagram(tpy,py)
+plt.plot(tmY,hY,'rs')
+plt.plot(tmY,lY,'rs')
+
+
+print('initial eye opening :', eyeX)
+print('final eye opening :', eyeY)
+    
