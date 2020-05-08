@@ -112,3 +112,46 @@ def propDispersion(t, y, b2, L):
     Z = Y * di
     _ , z = invspec(f, Z)
     return z 
+
+def bitIndex(t, Tb, Nb):
+
+    m = np.zeros( t.size )
+    
+    for i, t1 in enumerate(t):
+        if (t1 >= 0) and (t1 < Nb*Tb):
+            m[i] = np.floor( t1/ Tb )
+        else:
+            m[i] = -1
+        
+    return m.astype(int)
+
+def bitPulsesRect(t, bits, Tb, Nb, Pmax):
+
+    x = np.zeros(t.size)
+    m = bitIndex(t, Tb, Nb)    
+
+    for i, mm in enumerate(m):
+        if mm >= 0:    
+            x[i] = bits[mm]
+            
+    return x * np.sqrt(Pmax)
+
+def gaussFilterCharacteristic(f, B):
+    
+    sigma = B / 2.0 / np.sqrt( np.log(2.0) )
+    
+    return np.exp( -f ** 2.0 / 2.0 / sigma ** 2.0)
+
+def gaussFilter(t, x, B):
+
+    f, X = spec(t, x)
+    H = gaussFilterCharacteristic( f, B )
+    Y = X * H
+    _, y = invspec(f, Y)
+    
+    return y
+
+def bitPulsesGaussian(t, bits, Tb, Nb, Pmax, B):
+    
+    x = bitPulsesRect(t, bits, Tb, Nb, Pmax)
+    return gaussFilter(t, x, B)

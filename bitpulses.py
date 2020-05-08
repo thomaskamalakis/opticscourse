@@ -8,7 +8,7 @@ Created on Thu Apr 23 20:00:28 2020
 
 import numpy as np
 import matplotlib.pyplot as plt  
-from liboptics import gaussPulse, width, propDispersion
+from liboptics import bitPulsesGaussian 
 
 def bitIndex(t, Tb, Nb):
 
@@ -37,8 +37,9 @@ bits = [1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1]
 Nb = len(bits)
 Rb = 10e9
 Tb = 1.0 / Rb
-Tg = 5.0 * Tb
+Tg = 10.0 * Tb
 Pmax = 0.01
+B = 2.0 * Rb
 
 T = Nb * Tb + 2.0 * Tg
 Nt = 16384  
@@ -47,11 +48,11 @@ Tmax = Nb * Tb + Tg
 Dt = T / Nt
 
 t = np.arange(Tmin, Tmax, Dt)
-x = bitPulses(t, bits, Tb, Nb, Pmax)
+x = bitPulsesGaussian(t, bits, Tb, Nb, Pmax, B)
 
 plt.close('all')   
 plt.figure(1)
-plt.plot(t, x)
+plt.plot(t, np.abs(x) )
    
 
 
